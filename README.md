@@ -1,4 +1,7 @@
 ![kaboom](learn/kaboom.png)
 ```Javascript
-Maden with Javascript and Kaboom.js!
+Maded with Javascript and Kaboom.js!
+Version: 0.1.0
+Autor  : Spllit
 ```
+Visit on [Replit](https://Replit.com/Spllit/Halloween-Game)
