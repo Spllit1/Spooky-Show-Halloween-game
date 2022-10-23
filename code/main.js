@@ -15,7 +15,6 @@ let game = kaboom({
 // load assets -----------------------------------------------------------------------
 // Sprites
 loadSprite("bean", "sprites/bean.png");
-loadSprite("Live", "sprites/Live.png");
 loadSprite("mark", "sprites/mark.png");
 loadSprite("Apple", "sprites/Apple.png");
 loadSprite("ghosty", "sprites/ghosty.png");
@@ -34,6 +33,7 @@ loadSound("blip", "sounds/blip.mp3");
 loadSound("click", "sounds/click.mp3");
 loadSound("score", "sounds/score.mp3");
 loadSound("Scream", "sounds/Scream.mp3");
+loadSound("bgmusic", "sounds/bgmusic.mp3");
 loadSound("OtherworldlyFoe", "sounds/OtherworldlyFoe.mp3");
 
 
@@ -54,12 +54,17 @@ loadSprite("Thumbs", "sprites/Thumbs.png", {
 });
 
 // Puplic variables --------------------------------------------------------------------
+const games = ["gButton", "gGive", "gBasketball"]
 const music = play("OtherworldlyFoe", {
   volume: 0.8,
   loop: true
 })
 const newsong = play("New", {
   volume: 0.8,
+  loop: true
+})
+const bgmusic = play("bgmusic", {
+  volume: 0.3,
   loop: true
 })
 
@@ -71,8 +76,22 @@ let gameOver = false
 
 // Next level screen scene -------------------------------------------------------------
 scene("Next", ()=>{
+  bgmusic.stop()
   newsong.play()
+  
+  const random = Math.floor(Math.random() * games.length);
+
   // displaying score
+  add([
+    sprite("SpiderWeb"),
+    pos(width()-150, 0),
+    scale(4, 4)
+  ])
+  add([
+    sprite("ghosty"),
+    pos(width()/2, height()/2+200 ),
+    origin("center")
+  ])
   add([
     text("Score: " + score, {
       font: "sinko",
@@ -124,8 +143,9 @@ scene("Next", ()=>{
         color(rgb(36, 145, 47))
       ])
   }
-  wait(8.5, ()=>{
+  wait(8, ()=>{
     newsong.stop()
+    go(games[random])
   })
 })
 
@@ -436,6 +456,8 @@ scene("howtp", () => {
 
 // Scene to enable audio --------------------------------------------------------------
 scene("EnableAudio", () => {
+  bgmusic.stop()
+  newsong.stop()
   music.stop()
   
 

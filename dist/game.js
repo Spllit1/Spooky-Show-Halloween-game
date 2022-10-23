@@ -2917,7 +2917,6 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
     background: [194, 117, 16]
   });
   loadSprite("bean", "sprites/bean.png");
-  loadSprite("Live", "sprites/Live.png");
   loadSprite("mark", "sprites/mark.png");
   loadSprite("Apple", "sprites/Apple.png");
   loadSprite("ghosty", "sprites/ghosty.png");
@@ -2933,6 +2932,7 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
   loadSound("click", "sounds/click.mp3");
   loadSound("score", "sounds/score.mp3");
   loadSound("Scream", "sounds/Scream.mp3");
+  loadSound("bgmusic", "sounds/bgmusic.mp3");
   loadSound("OtherworldlyFoe", "sounds/OtherworldlyFoe.mp3");
   loadSprite("Thumbs", "sprites/Thumbs.png", {
     sliceX: 2,
@@ -2948,6 +2948,7 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
       }
     }
   });
+  var games = ["gButton", "gGive", "gBasketball"];
   var music = play("OtherworldlyFoe", {
     volume: 0.8,
     loop: true
@@ -2956,12 +2957,28 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
     volume: 0.8,
     loop: true
   });
+  var bgmusic = play("bgmusic", {
+    volume: 0.3,
+    loop: true
+  });
   var Version = "0.1.0";
   var lives = 3;
   var score = 0;
   var gameOver = false;
   scene("Next", () => {
+    bgmusic.stop();
     newsong.play();
+    const random = Math.floor(Math.random() * games.length);
+    add([
+      sprite("SpiderWeb"),
+      pos(width() - 150, 0),
+      scale(4, 4)
+    ]);
+    add([
+      sprite("ghosty"),
+      pos(width() / 2, height() / 2 + 200),
+      origin("center")
+    ]);
     add([
       text("Score: " + score, {
         font: "sinko",
@@ -3011,8 +3028,9 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
         color(rgb(36, 145, 47))
       ]);
     }
-    wait(8.5, () => {
+    wait(8, () => {
       newsong.stop();
+      go(games[random]);
     });
   });
   function looseLive() {
@@ -3281,6 +3299,8 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
     updateDialog();
   });
   scene("EnableAudio", () => {
+    bgmusic.stop();
+    newsong.stop();
     music.stop();
     const text12 = add([
       text("Click anywhere to enable spookynes!", {
