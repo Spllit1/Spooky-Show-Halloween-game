@@ -1,5 +1,5 @@
 <p align="center">
-  ![kaboom](learn/kaboom.png)
+  <img width="300" src="https://kaboomjs.com/site/img/kaboom.png" alt="Kaboom">
 </p>
 
 
