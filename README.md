@@ -1,7 +1,7 @@
-
-<div style="align: center;">
+<p align="center">
   ![kaboom](learn/kaboom.png)
-</div>
+</p>
+
 
 ```Javascript
 Maded with Javascript and Kaboom.js!
