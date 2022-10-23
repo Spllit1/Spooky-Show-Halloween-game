@@ -6,7 +6,7 @@
 ```Javascript
 Maded with Javascript and Kaboom.js!
 Version: 0.1.0
-Autor  : Spllit
+Autor  : Spllit1
 ```
 Visit on [Replit.](https://replit.com/@Spllit/Halloween-Game?v=1)
 I spent **alot** of time in this game.
