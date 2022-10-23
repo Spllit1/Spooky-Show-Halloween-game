@@ -7,6 +7,7 @@ Autor  : Spllit
 Visit on [Replit.](https://replit.com/@Spllit/Halloween-Game?v=1)
 I spent **alot** of time in this game.
 Please leave a like :)
+None of theese sounds are copyrighted.
 
 ## How to play
 

@@ -16,6 +16,7 @@ let game = kaboom({
 // Sprites
 loadSprite("bean", "sprites/bean.png");
 loadSprite("Live", "sprites/Live.png");
+loadSprite("mark", "sprites/mark.png");
 loadSprite("Apple", "sprites/Apple.png");
 loadSprite("ghosty", "sprites/ghosty.png");
 loadSprite("SpiderWeb", "sprites/SpiderWeb.png");
@@ -28,8 +29,11 @@ loadPedit("hoop", "sprites/basketball hoop.pedit");
 
 // Sounds
 loadSound("hit", "sounds/hit.mp3");
+loadSound("New", "sounds/New.mp3");
 loadSound("blip", "sounds/blip.mp3");
+loadSound("click", "sounds/click.mp3");
 loadSound("score", "sounds/score.mp3");
+loadSound("Scream", "sounds/Scream.mp3");
 loadSound("OtherworldlyFoe", "sounds/OtherworldlyFoe.mp3");
 
 
@@ -54,6 +58,11 @@ const music = play("OtherworldlyFoe", {
   volume: 0.8,
   loop: true
 })
+const newsong = play("New", {
+  volume: 0.8,
+  loop: true
+})
+
 
 let Version = "0.1.0"
 let lives = 3
@@ -62,6 +71,7 @@ let gameOver = false
 
 // Next level screen scene -------------------------------------------------------------
 scene("Next", ()=>{
+  newsong.play()
   // displaying score
   add([
     text("Score: " + score, {
@@ -114,6 +124,9 @@ scene("Next", ()=>{
         color(rgb(36, 145, 47))
       ])
   }
+  wait(8.5, ()=>{
+    newsong.stop()
+  })
 })
 
 
@@ -121,7 +134,7 @@ scene("Next", ()=>{
 // Loose live function -----------------------------------------------------------------
 function looseLive(){	
   if(lives > 0){
-    lives -= 0
+    lives -= 1
     go("Next")
   } else{
     gameOver = true
@@ -133,6 +146,8 @@ function looseLive(){
 
 // Button game -------------------------------------------------------------------------
 scene("gButton", ()=>{
+  newsong.stop()
+  let tdead = false
   let timer = 16
   music.stop()
   
@@ -174,15 +189,36 @@ scene("gButton", ()=>{
     }
   })
   small.onClick(()=>{
-    looseLive()
-    go("Next")
+    play("click")
+    play("Scream")
+    tdead = true
+    const mytext = add([
+      text("That was the 'Loose live' button!", {
+        font: "sinko",
+        size: 40
+      }),
+      origin("center"),
+      pos(width()/2, height()/2-100),
+      area()
+    ])
+    add([
+      sprite("mark"),
+      scale(4, 4),
+      pos(mytext.pos.x, mytext.pos.y + 100),
+      area(),
+      origin("center")
+    ])
+    wait(5, ()=>{
+      looseLive()
+      go("Next")
+    })
   })
   for(let i = -1; i < timer; i++){
     wait(i, () => {
       displaytimer.text = timer
       timer -= 1
       shake(timer+20)
-      if(i > 14){
+      if(i > 14 && !tdead){
         score += 100
         go("Next")
       }

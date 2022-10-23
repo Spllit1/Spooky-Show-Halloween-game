@@ -2918,6 +2918,7 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
   });
   loadSprite("bean", "sprites/bean.png");
   loadSprite("Live", "sprites/Live.png");
+  loadSprite("mark", "sprites/mark.png");
   loadSprite("Apple", "sprites/Apple.png");
   loadSprite("ghosty", "sprites/ghosty.png");
   loadSprite("SpiderWeb", "sprites/SpiderWeb.png");
@@ -2927,8 +2928,11 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
   loadPedit("CandyCorn", "sprites/CandyCorn.pedit");
   loadPedit("hoop", "sprites/basketball hoop.pedit");
   loadSound("hit", "sounds/hit.mp3");
+  loadSound("New", "sounds/New.mp3");
   loadSound("blip", "sounds/blip.mp3");
+  loadSound("click", "sounds/click.mp3");
   loadSound("score", "sounds/score.mp3");
+  loadSound("Scream", "sounds/Scream.mp3");
   loadSound("OtherworldlyFoe", "sounds/OtherworldlyFoe.mp3");
   loadSprite("Thumbs", "sprites/Thumbs.png", {
     sliceX: 2,
@@ -2948,11 +2952,16 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
     volume: 0.8,
     loop: true
   });
+  var newsong = play("New", {
+    volume: 0.8,
+    loop: true
+  });
   var Version = "0.1.0";
   var lives = 3;
   var score = 0;
   var gameOver = false;
   scene("Next", () => {
+    newsong.play();
     add([
       text("Score: " + score, {
         font: "sinko",
@@ -3002,10 +3011,13 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
         color(rgb(36, 145, 47))
       ]);
     }
+    wait(8.5, () => {
+      newsong.stop();
+    });
   });
   function looseLive() {
     if (lives > 0) {
-      lives -= 0;
+      lives -= 1;
       go("Next");
     } else {
       gameOver = true;
@@ -3013,6 +3025,8 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
   }
   __name(looseLive, "looseLive");
   scene("gButton", () => {
+    newsong.stop();
+    let tdead = false;
     let timer = 16;
     music.stop();
     const displaytimer = add([
@@ -3053,15 +3067,36 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
       }
     });
     small.onClick(() => {
-      looseLive();
-      go("Next");
+      play("click");
+      play("Scream");
+      tdead = true;
+      const mytext = add([
+        text("That was the 'Loose live' button!", {
+          font: "sinko",
+          size: 40
+        }),
+        origin("center"),
+        pos(width() / 2, height() / 2 - 100),
+        area()
+      ]);
+      add([
+        sprite("mark"),
+        scale(4, 4),
+        pos(mytext.pos.x, mytext.pos.y + 100),
+        area(),
+        origin("center")
+      ]);
+      wait(5, () => {
+        looseLive();
+        go("Next");
+      });
     });
     for (let i = -1; i < timer; i++) {
       wait(i, () => {
         displaytimer.text = timer;
         timer -= 1;
         shake(timer + 20);
-        if (i > 14) {
+        if (i > 14 && !tdead) {
           score += 100;
           go("Next");
         }
