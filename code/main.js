@@ -68,6 +68,7 @@ const bgmusic = play("bgmusic", {
   loop: true
 })
 
+firstround = true
 
 let Version = "0.1.0"
 let lives = 3
@@ -112,39 +113,64 @@ scene("Next", ()=>{
     color(rgb(255, 0, 0))
   ])
   // adding "splash" text
-  if(lives == 2){
-    add([
-      text("You better play it safe!", {
-        font: "sinko",
-        size: 40
-      }),
-      origin("center"),
-      pos(width()/2, height()/2+100),
-      color(rgb(245, 155, 10))
-    ])
-  } else if(lives == 1){
+  if(!firstround){
+    if(lives == 2){
       add([
-        text("This might be your last round!", {
+        text("You better play it safe!", {
           font: "sinko",
           size: 40
         }),
         origin("center"),
         pos(width()/2, height()/2+100),
-        color(rgb(245, 24, 0))
+        color(rgb(245, 155, 10))
       ])
-  } else if(lives == 3){
+    } else if(lives == 1){
+        add([
+          text("This might be your last round!", {
+            font: "sinko",
+            size: 40
+          }),
+          origin("center"),
+          pos(width()/2, height()/2+100),
+          color(rgb(245, 24, 0))
+        ])
+    } else if(lives == 3){
+        add([
+          text("Your doing... alright!", {
+            font: "sinko",
+            size: 40
+          }),
+          origin("center"),
+          pos(width()/2, height()/2+100),
+          color(rgb(36, 145, 47))
+        ])
+    }
+  } else {
+    if(lives == 2){
       add([
-        text("Your doing... alright!", {
-          font: "sinko",
-          size: 40
-        }),
-        origin("center"),
-        pos(width()/2, height()/2+100),
-        color(rgb(36, 145, 47))
+          text("It was your first round...", {
+            font: "sinko",
+            size: 40
+          }),
+          origin("center"),
+          pos(width()/2, height()/2+100),
+          color(rgb(36, 145, 47))
       ])
+    } else{
+      add([
+          text("Starter luck...", {
+            font: "sinko",
+            size: 40
+          }),
+          origin("center"),
+          pos(width()/2, height()/2+100),
+          color(rgb(36, 145, 47))
+      ])
+    }
   }
   wait(8, ()=>{
     newsong.stop()
+    bgmusic.play()
     go(games[random])
   })
 })
