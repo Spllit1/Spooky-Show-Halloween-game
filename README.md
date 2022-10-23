@@ -1,4 +1,7 @@
-![kaboom](learn/kaboom.png)
+!
+<div style="align: center;">
+  [kaboom](learn/kaboom.png)
+</div>
 ```Javascript
 Maded with Javascript and Kaboom.js!
 Version: 0.1.0
