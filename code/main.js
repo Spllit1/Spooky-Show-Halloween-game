@@ -29,10 +29,12 @@ loadPedit("hoop", "sprites/basketball hoop.pedit");
 // Sounds
 loadSound("hit", "sounds/hit.mp3");
 loadSound("New", "sounds/New.mp3");
+loadSound("bing", "sounds/bing.mp3");
 loadSound("blip", "sounds/blip.mp3");
 loadSound("click", "sounds/click.mp3");
 loadSound("score", "sounds/score.mp3");
 loadSound("Scream", "sounds/Scream.mp3");
+loadSound("buzzer", "sounds/buzzer.mp3");
 loadSound("bgmusic", "sounds/bgmusic.mp3");
 loadSound("OtherworldlyFoe", "sounds/OtherworldlyFoe.mp3");
 
@@ -67,9 +69,7 @@ const bgmusic = play("bgmusic", {
   volume: 0.3,
   loop: true
 })
-
 firstround = true
-
 let Version = "0.1.0"
 let lives = 3
 let score = 0
@@ -79,10 +79,7 @@ let gameOver = false
 scene("Next", ()=>{
   bgmusic.stop()
   newsong.play()
-  
   const random = Math.floor(Math.random() * games.length);
-
-  // displaying score
   add([
     sprite("SpiderWeb"),
     pos(width()-150, 0),
@@ -102,7 +99,6 @@ scene("Next", ()=>{
     pos(width()/2, height()/2-100),
     color(rgb(232, 226, 49))
   ])
-  // displaying lives
   add([
     text("Lives: " + lives, {
       font: "sinko",
@@ -112,8 +108,20 @@ scene("Next", ()=>{
     pos(width()/2, height()/2-50),
     color(rgb(255, 0, 0))
   ])
-  // adding "splash" text
-  if(!firstround){
+  if(firstround){
+    if(lives == 3){
+      add([
+          text("Starter luck...", {
+            font: "sinko",
+            size: 40
+          }),
+          origin("center"),
+          pos(width()/2, height()/2+100),
+          color(rgb(36, 145, 47))
+      ])
+    }
+  }
+  if (!firstround){
     if(lives == 2){
       add([
         text("You better play it safe!", {
@@ -145,29 +153,8 @@ scene("Next", ()=>{
           color(rgb(36, 145, 47))
         ])
     }
-  } else {
-    if(lives == 2){
-      add([
-          text("It was your first round...", {
-            font: "sinko",
-            size: 40
-          }),
-          origin("center"),
-          pos(width()/2, height()/2+100),
-          color(rgb(36, 145, 47))
-      ])
-    } else{
-      add([
-          text("Starter luck...", {
-            font: "sinko",
-            size: 40
-          }),
-          origin("center"),
-          pos(width()/2, height()/2+100),
-          color(rgb(36, 145, 47))
-      ])
-    }
   }
+  firstround = false
   wait(8, ()=>{
     newsong.stop()
     bgmusic.play()
@@ -186,6 +173,38 @@ function looseLive(){
     gameOver = true
   }
 }
+
+
+// click game --------------------------------------------------------------------------
+scene("gClick", ()=>{
+  newsong.stop()
+  music.stop()
+  const texttt = add([
+    text("Click all pumpkins!", {
+      font: "sinko",
+      size: 30
+    }),
+    pos(width()/2, 20),
+    origin("center")
+  ])
+  let index = 0
+  for(let c = 0; c<25; c++){
+    index++
+    const pum = add([
+      sprite("Pumpkin"),
+      scale(3, 3),
+      area(),
+      pos(Math.floor(Math.random() * width()-200), Math.floor(Math.random() * height()-200))
+    ])
+    pum.onClick(()=>{
+      index--
+      destroy(pum)
+      burp()
+      debug.log(index)
+    })
+  }
+  
+})
 
 
 
@@ -280,11 +299,42 @@ scene("gButton", ()=>{
 
 
 
-
-
 // Give game game ----------------------------------------------------------------------
 scene("gGive", ()=>{
+  let disabled = false
+  newsong.stop()
   music.stop()
+  let timer = 5
+  const displaytimer = add([
+    text(timer,{
+      font: "sinko",
+      size: 70
+    }),
+    origin("center"),
+    pos(width()/2, 40),
+    color(rgb(255, 0, 0))
+  ])
+  add([
+    text("drag and drop!", {
+      font: "sinko",
+      size: 30
+    }),
+    pos(width()/2, height()-50),
+    origin("center")
+  ])
+  for(let i = 0; i < timer+1; i++){
+    wait(i, () => {
+      if(!disabled){
+        displaytimer.text = timer
+        timer -= 1
+        shake(timer+20)
+        if(i>4){
+          looseLive()
+          go("Next")
+        }
+      }
+    })
+  }
   let curDraggin = null
   function drag() {
   	let offset = vec2(0)
@@ -298,20 +348,18 @@ scene("gGive", ()=>{
   				}
   				curDraggin = this
   				offset = mousePos().sub(this.pos)
-  				readd(this)
   			})
   		},
   		update() {
   			if (curDraggin === this) {
-  				this.pos = mousePos().sub(offset)
-          
-  			}
-        
-  		},
-  	}
+	  			cursor("move")
+	  			this.moveTo(mousePos().sub(offset), 999)
+	  		}
+	  	},
+    }
   }
   onMouseRelease(() => {
-  	curDraggin = null
+	  curDraggin = null
   })
   
 
@@ -322,7 +370,8 @@ scene("gGive", ()=>{
     scale(3, 3),
     drag(),
     origin("center"),
-    "apple"
+    "apple",
+    
   ])
   const candy = add([
     sprite("CandyCorn"),
@@ -339,17 +388,77 @@ scene("gGive", ()=>{
     pos(width()/2, height()/2),
     scale(4, 4),
     origin("center"),
-    "holder"
+    "holder",
+    solid()
   ])
-  
-  
+  const text21312 = add([
+    text("What do you give em?", {
+      font: "sinko",
+      size: 30
+    }),
+    pos(width()/2, height()/2-250 - 80),
+    origin("center")
+  ])
 
+
+  holder.onCollide("apple", ()=>{
+    if(!disabled){
+      play("buzzer")
+      disabled = true
+      const hi = add([
+        sprite("Thumbs"),
+        pos(width()/2, height()/2-250),
+        area(),
+        scale(1.2,1.2),
+        origin("center")
+      ])
+      wait(3, ()=>{
+        looseLive()
+        go("Next")
+      })
+      text21312.text = "Apple?! Ehw!"
+      
+      hi.play("down")
+    }
+  })
+  holder.onCollide("candy", ()=>{
+    if(!disabled){
+      play("bing")
+      disabled = true
+      const hi = add([
+        sprite("Thumbs"),
+        pos(width()/2, height()/2-250),
+        area(),
+        scale(1.2,1.2),
+        origin("center")
+      ])
+      wait(3, ()=>{
+        score += 100
+        go("Next")
+      })
+      text21312.text = "Yummy!"
+      
+      hi.play("up")
+    }
+  })
+  
+  onUpdate(() => cursor("default"))
 })
 
 // Basketball game ---------------------------------------------------------------------
 scene("gBasketball", () => {
+  let timer2 = 5
+  newsong.stop()
   const SPEED = 600
-  
+  const displaytimer = add([
+    text(timer2,{
+      font: "sinko",
+      size: 70
+    }),
+    origin("center"),
+    pos(width()/2, height()-75),
+    color(rgb(255, 0, 0))
+  ])
   let going = "right"
   music.stop()
   let hoop = add([
@@ -357,21 +466,32 @@ scene("gBasketball", () => {
     scale(4, 4),
     origin("center"),
     pos(width() / 2, 200),
-    area()
+    area(),
+    "hoop"
   ])
   add([
     sprite("SpiderWeb"),
-    pos(width()-120, 20),
+    pos(width()-120, 0),
     scale(2, 2)
   ])
 
   let pumpk = add([
-    pos(width()/2, 700),
+    pos(width()/2, height()/2+50),
     sprite("Pumpkin"),
-    scale(3, 3),
+    scale(2, 2),
     origin("center"),
     area(),
     body()
+  ])
+  let rect123 = add([
+    pos(width()/2, height()/2+150),
+    rect(200, 40, {
+      radius: 5
+    }),
+    origin("center"),
+    area(),
+    solid(),
+    color(rgb(128, 87, 22))
   ])
   add([
     text("Click the anywhere!",{
@@ -384,13 +504,15 @@ scene("gBasketball", () => {
   ])
 
   onClick(()=>{
-    addKaboom(mousePos())
+    if(pumpk.isGrounded()){
+      pumpk.jump(1300)
+    }
   })
   onUpdate(()=>{
-    if(hoop.pos.x > width()-500){
+    if(hoop.pos.x > width()-200){
       going="left"
     }
-    if(hoop.pos.x < 500){
+    if(hoop.pos.x < 200){
       going="right"
     }
     if(going == "left"){
@@ -399,6 +521,24 @@ scene("gBasketball", () => {
       hoop.move(SPEED, 0)
     }
   })
+  pumpk.onCollide("hoop", ()=>{
+    add([
+      text("You did it!",{
+        font: "sinko",
+        size: 30
+      }),
+      pos(width()/2, 20),
+      area(),
+      origin("center")
+   ])
+  })
+
+  for(let i = 0; i < timer2; i++){
+    wait(i, () => {
+      displaytimer.text = timer2
+      timer2 -= 1
+    })
+  }
 })
 
 
@@ -417,8 +557,6 @@ scene("howtp", () => {
     fixed(),
     scale(2,2)
   ])
-  
-  // Define the dialogue data
   const dialogs = [
     ["bean", "You play many minigames..."],
     ["bean", "But dont be too slow!"],
@@ -485,8 +623,6 @@ scene("EnableAudio", () => {
   bgmusic.stop()
   newsong.stop()
   music.stop()
-  
-
   const text12 = add([
     text("Click anywhere to enable spookynes!", {
       font: "sinko"
@@ -516,7 +652,6 @@ scene("EnableAudio", () => {
     burp()
     go("menu")
   })
-  
 })
 
 
@@ -537,7 +672,6 @@ scene("menu", () => {
     fixed(),
     scale(2,2)
   ])
-  
   const text1 = add([
     text("Menu", {
       font: "sinko",
@@ -644,6 +778,9 @@ scene("menu", () => {
       BgRect.color = rgb(70, 74, 189)
     }
   })
+  BgRect.onClick(()=>{
+    go("Next")
+  })
   // making some things here you know...
   onUpdate(() => {
     let something = Math.floor(Math.random() * 100000);
@@ -671,7 +808,5 @@ scene("menu", () => {
 })
 
 
-
-
 // Start the game ----------------------------------------------------------------------
-go("gButton")
+go("gClick")
