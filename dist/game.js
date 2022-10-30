@@ -2950,7 +2950,7 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
       }
     }
   });
-  var games = ["gButton", "gGive", "gClick"];
+  var games = ["gButton", "gGive", "gClick", "gBasketball"];
   var music = play("OtherworldlyFoe", {
     volume: 0.8,
     loop: true
@@ -3126,6 +3126,98 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
     }
   }
   __name(looseLive, "looseLive");
+  var FLOOR_HEIGHT = 48;
+  var JUMP_FORCE = 800;
+  var SPEED = 480;
+  scene("gRunner", () => {
+    newsong.stop();
+    music.stop();
+    let timer = 6;
+    let done = false;
+    const displaytimer = add([
+      text(timer, {
+        font: "sinko",
+        size: 70
+      }),
+      origin("center"),
+      pos(width() / 2, height() - 134),
+      color(rgb(255, 0, 0))
+    ]);
+    gravity(1900);
+    const player = add([
+      sprite("Pumpkin"),
+      pos(80, 40),
+      area(),
+      body(),
+      scale(1.5, 1.5)
+    ]);
+    add([
+      rect(width(), FLOOR_HEIGHT),
+      outline(4),
+      pos(0, height()),
+      origin("botleft"),
+      area(),
+      solid(),
+      color(127, 200, 255)
+    ]);
+    for (let i = 0; i < timer + 1; i++) {
+      wait(i, () => {
+        displaytimer.text = timer;
+        timer -= 1;
+      });
+    }
+    function jump() {
+      play("score");
+      if (player.isGrounded()) {
+        player.jump(JUMP_FORCE);
+      }
+    }
+    __name(jump, "jump");
+    onKeyPress(jump);
+    onClick(jump);
+    function spawnTree() {
+      add([
+        rect(48, rand(32, 96)),
+        area(),
+        outline(4),
+        pos(width(), height() - FLOOR_HEIGHT),
+        origin("botleft"),
+        color(255, 180, 255),
+        move(LEFT, SPEED),
+        cleanup(),
+        "tree"
+      ]);
+      wait(rand(0.5, 1.5), spawnTree);
+    }
+    __name(spawnTree, "spawnTree");
+    spawnTree();
+    player.onCollide("tree", () => {
+      if (!done) {
+        burp();
+        looseLive();
+        go("Next");
+      }
+    });
+    onUpdate(() => {
+      if (!done && timer < 0) {
+        add([
+          text("You win!", {
+            font: "sinko",
+            size: 40
+          }),
+          color(rgb(0, 255, 0)),
+          pos(width() / 2, 20),
+          origin("center")
+        ]);
+        done = true;
+        play("bing");
+        score += 100;
+        wait(3, () => {
+          go("Next");
+        });
+      }
+    });
+  });
   scene("gClick", () => {
     let timer = 10;
     newsong.stop();
@@ -3180,6 +3272,7 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
         play("bing");
         done = true;
         wait(3, () => {
+          score += 110;
           go("Next");
         });
       }
@@ -3189,6 +3282,7 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
         play("Scream");
         done = true;
         wait(3, () => {
+          looseLive();
           go("Next");
         });
       }
@@ -3217,6 +3311,15 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
       color(rgb(117, 117, 117)),
       solid(),
       "btn"
+    ]);
+    add([
+      text("*Big red button*", {
+        font: "sinko",
+        size: 20
+      }),
+      pos(width() / 2, height() / 2 + 450),
+      color(rgb(255, 0, 0)),
+      origin("center")
     ]);
     const small = add([
       rect(250, 250),
@@ -3413,7 +3516,7 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
   scene("gBasketball", () => {
     let timer2 = 5;
     newsong.stop();
-    const SPEED = 600;
+    const SPEED2 = 600;
     const displaytimer = add([
       text(timer2, {
         font: "sinko",
@@ -3471,6 +3574,17 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
       }
     });
     onUpdate(() => {
+      if (timer2 < 1 && !done) {
+        done = true;
+        play("Scream");
+        textf.text = "Try harder next time!";
+        textf.color = rgb(250, 0, 0);
+        play("bing");
+        done = true;
+        wait(5, () => {
+          go("Next");
+        });
+      }
       if (hoop.pos.x > width() - 200) {
         going = "left";
       }
@@ -3478,14 +3592,20 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
         going = "right";
       }
       if (going == "left") {
-        hoop.move(-SPEED, 0);
+        hoop.move(-SPEED2, 0);
       } else {
-        hoop.move(SPEED, 0);
+        hoop.move(SPEED2, 0);
       }
     });
+    let done = false;
     pumpk.onCollide("hoop", () => {
       textf.text = "You did it!";
       textf.color = rgb(0, 255, 0);
+      play("bing");
+      done = true;
+      wait(5, () => {
+        go("Next");
+      });
     });
     for (let i = 0; i < timer2; i++) {
       wait(i, () => {
@@ -3569,35 +3689,46 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
     bgmusic.stop();
     newsong.stop();
     music.stop();
-    const text12 = add([
-      text("Click anywhere to enable spookynes!", {
-        font: "sinko"
-      }),
-      pos(width() / 2),
-      origin("center"),
-      scale(3, 3)
-    ]);
-    const Text123 = add([
-      text("Version " + Version, {
-        font: "sinko"
-      }),
-      pos(width() / 2, 20),
-      origin("center"),
-      outline(4),
-      area(),
-      fixed(),
-      scale(2, 2)
-    ]);
-    const ghosthere = add([
-      sprite("ghosty"),
-      pos(text12.pos.x, text12.pos.y + 70),
-      origin("center")
-    ]);
-    camPos(text12.pos);
-    onClick(() => {
-      burp();
-      go("menu");
-    });
+    if (window.innerWidth < 850) {
+      const text12 = add([
+        text("Stop right there!\nYou need to play this game\nin a new tab!", {
+          font: "sinko"
+        }),
+        pos(width() / 2, height() / 2),
+        origin("center"),
+        scale(3, 3)
+      ]);
+    } else {
+      const text12 = add([
+        text("Click anywhere to enable spookynes!", {
+          font: "sinko"
+        }),
+        pos(width() / 2),
+        origin("center"),
+        scale(3, 3)
+      ]);
+      const Text123 = add([
+        text("Version " + Version, {
+          font: "sinko"
+        }),
+        pos(width() / 2, 20),
+        origin("center"),
+        outline(4),
+        area(),
+        fixed(),
+        scale(2, 2)
+      ]);
+      const ghosthere = add([
+        sprite("ghosty"),
+        pos(text12.pos.x, text12.pos.y + 70),
+        origin("center")
+      ]);
+      camPos(text12.pos);
+      onClick(() => {
+        burp();
+        go("menu");
+      });
+    }
   });
   scene("menu", () => {
     let done = false;
