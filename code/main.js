@@ -56,11 +56,15 @@ loadSprite("Thumbs", "sprites/Thumbs.png", {
 });
 
 // Puplic variables --------------------------------------------------------------------
-const games = ["gButton", "gGive", "gBasketball"]
+const games = ["gButton", "gGive", "gBasketball", "gClick"]
 const music = play("OtherworldlyFoe", {
   volume: 0.8,
   loop: true
 })
+function getRandom(min, max) {
+  return Math.random() * (max - min) + min;
+}
+
 const newsong = play("New", {
   volume: 0.8,
   loop: true
@@ -177,24 +181,20 @@ function looseLive(){
 
 // click game --------------------------------------------------------------------------
 scene("gClick", ()=>{
+  let timer = 10
   newsong.stop()
   music.stop()
-  const texttt = add([
-    text("Click all pumpkins!", {
-      font: "sinko",
-      size: 30
-    }),
-    pos(width()/2, 20),
-    origin("center")
-  ])
   let index = 0
+  
   for(let c = 0; c<25; c++){
+    const hello1 = getRandom(150, width()-150)
+    const hello2 = getRandom(150, height()-150)
     index++
     const pum = add([
       sprite("Pumpkin"),
       scale(3, 3),
       area(),
-      pos(Math.floor(Math.random() * width()-200), Math.floor(Math.random() * height()-200))
+      pos(hello1, hello2)
     ])
     pum.onClick(()=>{
       index--
@@ -204,6 +204,53 @@ scene("gClick", ()=>{
     })
   }
   
+  
+  const displaytimer = add([
+    text(timer,{
+      font: "sinko",
+      size: 70
+    }),
+    origin("center"),
+    pos(width()/2, height()-134),
+    color(rgb(255, 0, 0))
+  ])
+  
+  const texttt = add([
+    text("Click all pumpkins!", {
+      font: "sinko",
+      size: 40
+    }),
+    pos(width()/2, 60),
+    origin("center")
+  ])
+  for(let i = 0; i < timer+1; i++){
+    wait(i, () => {
+      displaytimer.text = timer
+      timer -= 1
+      shake(timer+20)
+    })
+  }
+  let done = false
+  onUpdate(()=>{
+    if(index == 0 && !done){
+      texttt.text = "You win!"
+      texttt.color = rgb(0, 255, 0)
+      play("bing")
+      done = true
+      wait(3, ()=>{
+        go("Next")
+      })
+    }
+    if(timer < 0 && !done){
+      texttt.text = "You loose!"
+      texttt.color = rgb(255, 0, 0)
+      play("Scream")
+      done = true
+      wait(3, ()=>{
+        go("Next")
+      })
+    }
+  })
 })
 
 
@@ -493,12 +540,12 @@ scene("gBasketball", () => {
     solid(),
     color(rgb(128, 87, 22))
   ])
-  add([
+  const textf = add([
     text("Click the anywhere!",{
       font: "sinko",
-      size: 30
+      size: 40
     }),
-    pos(width()/2, 20),
+    pos(width()/2, 80),
     area(),
     origin("center")
   ])
@@ -522,15 +569,9 @@ scene("gBasketball", () => {
     }
   })
   pumpk.onCollide("hoop", ()=>{
-    add([
-      text("You did it!",{
-        font: "sinko",
-        size: 30
-      }),
-      pos(width()/2, 20),
-      area(),
-      origin("center")
-   ])
+    textf.text = "You did it!"
+    textf.color = (rgb(0, 255, 0))
+   
   })
 
   for(let i = 0; i < timer2; i++){
@@ -809,4 +850,4 @@ scene("menu", () => {
 
 
 // Start the game ----------------------------------------------------------------------
-go("gClick")
+go("gBasketball")
