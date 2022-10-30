@@ -2950,7 +2950,7 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
       }
     }
   });
-  var games = ["gButton", "gGive", "gBasketball", "gClick"];
+  var games = ["gButton", "gGive", "gClick"];
   var music = play("OtherworldlyFoe", {
     volume: 0.8,
     loop: true
@@ -2972,7 +2972,67 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
   var lives = 3;
   var score = 0;
   var gameOver = false;
+  scene("gameOver", () => {
+    bgmusic.stop();
+    newsong.stop();
+    music.stop();
+    play("Scream");
+    add([
+      text("Game Over!", {
+        font: "sinko",
+        size: 40
+      }),
+      pos(width() / 2, height() / 2 - 100),
+      origin("center"),
+      color(255, 0, 0)
+    ]);
+    add([
+      text("Score: " + score, {
+        font: "sinko",
+        size: 40
+      }),
+      pos(width() / 2, height() / 2),
+      origin("center"),
+      color(255, 255, 0)
+    ]);
+    const texte = add([
+      text("Back to menu", {
+        font: "sinko",
+        size: 40
+      }),
+      pos(width() / 2, height() / 2 + 150),
+      origin("center"),
+      color(255, 0, 0),
+      area()
+    ]);
+    texte.onUpdate(() => {
+      if (texte.isHovering()) {
+        const t = time() * 10;
+        texte.color = rgb(
+          wave(0, 255, t),
+          wave(0, 255, t + 2),
+          wave(0, 255, t + 4)
+        );
+        texte.scale = vec2(1.2);
+      } else {
+        texte.scale = vec2(1);
+        texte.color = rgb();
+      }
+      texte.onClick(() => {
+        score = 0;
+        lives = 3;
+        gameOver = false;
+        bgmusic.stop();
+        newsong.stop();
+        music.stop();
+        go("menu");
+      });
+    });
+  });
   scene("Next", () => {
+    if (lives < 1) {
+      go("gameOver");
+    }
     bgmusic.stop();
     newsong.play();
     const random = Math.floor(Math.random() * games.length);
@@ -3401,7 +3461,7 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
         font: "sinko",
         size: 40
       }),
-      pos(width() / 2, 50),
+      pos(width() / 2, 80),
       area(),
       origin("center")
     ]);
@@ -3686,6 +3746,6 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
       }
     });
   });
-  go("gBasketball");
+  go("EnableAudio");
 })();
 //# sourceMappingURL=game.js.map

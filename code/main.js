@@ -56,7 +56,7 @@ loadSprite("Thumbs", "sprites/Thumbs.png", {
 });
 
 // Puplic variables --------------------------------------------------------------------
-const games = ["gButton", "gGive", "gBasketball", "gClick"]
+const games = ["gButton", "gGive", "gClick"]//, "gBasketball"]
 const music = play("OtherworldlyFoe", {
   volume: 0.8,
   loop: true
@@ -79,8 +79,71 @@ let lives = 3
 let score = 0
 let gameOver = false
 
+
+// Game over screen --------------------------------------------------------------------
+scene("gameOver", ()=>{
+  bgmusic.stop()
+  newsong.stop()
+  music.stop()
+  play("Scream")
+  add([
+    text("Game Over!", {
+      font: "sinko",
+      size: 40
+    }),
+    pos(width()/2,height()/2-100),
+    origin("center"),
+    color(255, 0, 0)
+  ])
+  add([
+    text("Score: "+score, {
+      font: "sinko",
+      size: 40
+    }),
+    pos(width()/2,height()/2),
+    origin("center"),
+    color(255,255,0)
+  ])
+  const texte = add([
+    text("Back to menu", {
+      font: "sinko",
+      size: 40
+    }),
+    pos(width()/2,height()/2+150),
+    origin("center"),
+    color(255, 0, 0),
+    area()
+  ])
+  texte.onUpdate(() => {
+		if (texte.isHovering()) {
+			const t = time() * 10
+			texte.color = rgb(
+				wave(0, 255, t),
+				wave(0, 255, t + 2),
+				wave(0, 255, t + 4),
+			)
+			texte.scale = vec2(1.2)
+		} else {
+			texte.scale = vec2(1)
+			texte.color = rgb()
+		}
+    texte.onClick(() => {
+      score = 0
+      lives = 3
+      gameOver = false
+      bgmusic.stop()
+      newsong.stop()
+      music.stop()
+      go("menu")
+    })
+	})
+})
+
 // Next level screen scene -------------------------------------------------------------
 scene("Next", ()=>{
+  if(lives < 1){
+    go("gameOver")
+  }
   bgmusic.stop()
   newsong.play()
   const random = Math.floor(Math.random() * games.length);
@@ -850,4 +913,4 @@ scene("menu", () => {
 
 
 // Start the game ----------------------------------------------------------------------
-go("gBasketball")
+go("EnableAudio")
